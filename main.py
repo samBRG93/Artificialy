@@ -1,24 +1,45 @@
 import json
+import secrets
+
 import pandas as pd
 from fastapi.responses import StreamingResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 import io
-
 from fastapi import FastAPI, Depends, UploadFile, Body, File, HTTPException, Form
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
+from starlette import status
 
-from clean import clean_north, clean_south, clean_west, clean_east
 from data_model import MapInput, parse_map, Action
-from db import get_db, Map, post_session, CleaningSession
+from db import get_db, Map, CleaningSession
+from clean import cleaning_session
+from passlib.context import CryptContext
 
 app = FastAPI()
+security = HTTPBasic()
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+USERS = {
+    "admin": '$2b$12$TifpVifVczZptFILuZ3VteJO8F9YESg68tRaStEBUTWSej8lgKKBK'
+}
+
+
+def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    hashed = USERS.get(credentials.username)
+    if not hashed or not pwd_context.verify(credentials.password, hashed):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 
 @app.post("/set-map/")
-async def set_map(id: int,
-                  json_data: str | None = Form(default=None),
-                  file: UploadFile | None = File(default=None),
-                  db: Session = Depends(get_db)):
+async def set_map(
+        id: int, json_data: str | None = Form(default=None), file: UploadFile | None = File(default=None),
+        db: Session = Depends(get_db), _user: str = Depends(get_current_user)):
     try:
         if json_data:
             parsed = json.loads(json_data)
@@ -53,63 +74,12 @@ async def set_map(id: int,
 
 # Rotta: aggiungi utente
 @app.post("/clean/")
-def clean(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db)):
-    status = None
-    cleaned_tiles = []
-    start_time = datetime.now()
-    map = db.query(Map).filter(Map.id == id).first()
-    num_of_actions = 0
-    try:
-        if not map:
-            raise HTTPException(status_code=404, detail="Map not found")
-        elif map.data['rows'] < x or map.data['cols'] < y:
-            raise HTTPException(status_code=400, detail="Un-correct starting point")
-        else:
-            map_data = map.data
-            tiles = map_data['tiles']
-            start_point = (x, y)
-            for num_of_actions, action in enumerate(actions):
-                step = action.step
-                if action.direction == 'north':
-                    ct, status = clean_north(start_point, step, tiles)
-                elif action.direction == 'south':
-                    ct, status = clean_south(start_point, step, tiles)
-                elif action.direction == 'west':
-                    ct, status = clean_west(start_point, step, tiles)
-                else:
-                    ct, status = clean_east(start_point, step, tiles)
-
-                cleaned_tiles.extend(ct)
-
-                if status != 'success':
-                    raise HTTPException(status_code=400, detail=status)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    finally:
-        end_time = datetime.now()
-        duration = (end_time - start_time).total_seconds()
-        map_id = map.id
-        num_cleaned_tiles = len(cleaned_tiles)
-
-        post_session(
-            map_id=map_id,
-            start_time=start_time,
-            final_state=status,
-            number_of_actions=num_of_actions,
-            num_cleaned_tiles=num_cleaned_tiles,
-            duration=duration,
-            db=db
-        )
-
-        report = {
-            'cleaned_tiles': cleaned_tiles,
-            'status': status
-        }
-        return report
+def clean(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db), _user: str = Depends(get_current_user)):
+    return cleaning_session(id, x, y, actions, db)
 
 
 @app.get("/history/")
-def history(map_id: str, db: Session = Depends(get_db)):
+def history(map_id: str, db: Session = Depends(get_db), _user: str = Depends(get_current_user)):
     try:
         sessions = db.query(CleaningSession).filter(CleaningSession.map_id == map_id).all()
 
@@ -145,6 +115,17 @@ def history(map_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.get("/extended-functionality/")
-def extended_functionality(nome: str, email: str, db: Session = Depends(get_db)):
-    pass
+@app.post("/extended-functionality/")
+def extended_functionality(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db), _user: str = Depends(get_current_user)):
+    session = db.query(CleaningSession).filter(CleaningSession.map_id == id).order_by(
+        CleaningSession.start_time.desc()).first()
+
+    if session:
+        end_time = session.start_time + timedelta(seconds=session.duration)
+        if end_time >= datetime.now() - timedelta(days=1):
+            return {
+                "id": id,
+                "message": f"Map with id: {id} has been cleaned in date: {end_time}. No need for cleaning"
+            }
+    else:
+        return cleaning_session(id, x, y, actions, db)
