@@ -1,0 +1,269 @@
+{
+	"info": {
+		"_postman_id": "35e1b672-5ec5-4265-9828-af396d95874a",
+		"name": "Artificialy Assignment: Cleaning Robot",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36371044",
+		"_collection_link": "https://solar-firefly-789824.postman.co/workspace/My-Workspace~81ac30ae-7c0f-4869-833e-cc8790950202/collection/36371044-35e1b672-5ec5-4265-9828-af396d95874a?action=share&source=collection_link&creator=36371044"
+	},
+	"item": [
+		{
+			"name": "SetMap",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "json_data",
+							"value": "{\"rows\":2,\"cols\":2,\"tiles\":[{\"x\":0,\"y\":0,\"walkable\":true},{\"x\":1,\"y\":0,\"walkable\":true},{\"x\":0,\"y\":1,\"walkable\":true},{\"x\":1,\"y\":1,\"walkable\":true}]}",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/samuele.bragantini/Desktop/map.txt"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/set-map/?id=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"set-map",
+						""
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://127.0.0.1:8000/set-map/?id=1' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: multipart/form-data' \\\n  -F 'json_data={\"rows\":2,\"cols\":2,\"tiles\":[{\"x\":0,\"y\":0,\"walkable\":true},{\"x\":1,\"y\":0,\"walkable\":true},{\"x\":0,\"y\":1,\"walkable\":true},{\"x\":1,\"y\":1,\"walkable\":true}]}' \\\n  -F 'file='"
+			},
+			"response": []
+		},
+		{
+			"name": "Clean",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n  {\"direction\": \"west\", \"step\": 2}\n]\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/clean/?id=4&x=1&y=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"clean",
+						""
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "4"
+						},
+						{
+							"key": "x",
+							"value": "1"
+						},
+						{
+							"key": "y",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://127.0.0.1:8000/clean/?id=1&x=0&y=0' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '[\n{\n    '\\''direction'\\'': '\\''nord'\\'',\n    '\\''step'\\'': 2\n}\n]'"
+			},
+			"response": []
+		},
+		{
+			"name": "ExtendedFunctionality",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\n  {\"direction\": \"west\", \"step\": 2}\n]\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/extended-functionality/?id=4&x=1&y=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"extended-functionality",
+						""
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "4"
+						},
+						{
+							"key": "x",
+							"value": "1"
+						},
+						{
+							"key": "y",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\n  'http://127.0.0.1:8000/clean/?id=1&x=0&y=0' \\\n  -H 'accept: application/json' \\\n  -H 'Content-Type: application/json' \\\n  -d '[\n{\n    '\\''direction'\\'': '\\''nord'\\'',\n    '\\''step'\\'': 2\n}\n]'"
+			},
+			"response": []
+		},
+		{
+			"name": "History",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/history/?map_id=1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"history",
+						""
+					],
+					"query": [
+						{
+							"key": "map_id",
+							"value": "1"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\n  'http://127.0.0.1:8000/history/?map_id=1' \\\n  -H 'accept: application/json'"
+			},
+			"response": []
+		}
+	]
+}
