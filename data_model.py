@@ -39,12 +39,6 @@ class MapInput(BaseModel):
     cols: int
     tiles: List[Tile]
 
-    @model_validator(mode="after")
-    def check_square(self):
-        if self.rows != self.cols:
-            raise ValueError("Map must be squared")
-        return self
-
     @field_validator("tiles")
     @classmethod
     def check_tiles(cls, tiles):
@@ -52,6 +46,19 @@ class MapInput(BaseModel):
             raise ValueError("Map must be walkable")
 
         return tiles
+
+    @model_validator(mode="after")
+    def check_consistency(self):
+        if self.rows != self.cols:
+            raise ValueError("Map must be squared")
+
+        expected_tiles = self.rows * self.cols
+        if len(self.tiles) != expected_tiles:
+            raise ValueError(
+                f"Number of tiles ({len(self.tiles)}) does not match rows*cols ({expected_tiles})"
+            )
+
+        return self
 
 
 def parse_map(text: str):
