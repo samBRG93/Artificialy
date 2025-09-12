@@ -2,15 +2,28 @@ from pydantic import BaseModel, field_validator, model_validator
 from typing import List
 
 
+class Action(BaseModel):
+    direction: str
+    step: int
+
+    @field_validator("step")
+    def check_step(cls, step):
+        if step <= 0:
+            raise ValueError("Step must be positive")
+        return step
+
+    @field_validator("direction")
+    def check_direction(cls, direction: str):
+        if direction.lower() not in ["north", "south", "east", "west"]:
+            raise ValueError("Direction must be north, south, east, west")
+
+        return direction.lower()
+
+
 class Tile(BaseModel):
     x: int
     y: int
     walkable: bool
-
-    # @field_validator("walkable")
-    # def check_tiles(cls, walkable):
-    #     if walkable != 'O' and walkable != 'X':
-    #         raise ValueError("walkable must be either 'O' or 'X'")
 
 
 class MapInput(BaseModel):
@@ -29,6 +42,8 @@ class MapInput(BaseModel):
     def check_tiles(cls, tiles):
         if len(tiles) < 2:
             raise ValueError("Map must be walkable")
+
+        return tiles
 
 
 def parse_map(text: str):
