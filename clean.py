@@ -71,6 +71,10 @@ def clean_east(start_point, step, tiles):
                 print('Salvare Sessione')
                 cleaned_tiles.append(selected_tile)
 
+                {
+
+                }
+
         return cleaned_tiles, 'success'
     except Exception:
         return cleaned_tiles, 'failure'
