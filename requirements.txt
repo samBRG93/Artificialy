@@ -26,6 +26,8 @@ pydantic-core==2.33.2
     # via pydantic
 python-dateutil==2.9.0.post0
     # via pandas
+python-dotenv==1.1.1
+    # via -r requirements.in
 python-multipart==0.0.20
     # via -r requirements.in
 pytz==2025.2

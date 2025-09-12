@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from db import Map, post_session
 
 
-def cleaning_session(id: int, x: int, y: int, actions: list, db):
+def execute_cleaning_session(id: int, x: int, y: int, actions: list, db):
     status = None
     cleaned_tiles = []
     start_time = datetime.now()
@@ -24,13 +24,13 @@ def cleaning_session(id: int, x: int, y: int, actions: list, db):
         for num_of_actions, action in enumerate(actions):
             step = action.step
             if action.direction == 'north':
-                ct, status = clean_north(start_point, step, tiles)
+                ct, status = _clean_north(start_point, step, tiles)
             elif action.direction == 'south':
-                ct, status = clean_south(start_point, step, tiles)
+                ct, status = _clean_south(start_point, step, tiles)
             elif action.direction == 'west':
-                ct, status = clean_west(start_point, step, tiles)
+                ct, status = _clean_west(start_point, step, tiles)
             else:
-                ct, status = clean_east(start_point, step, tiles)
+                ct, status = _clean_east(start_point, step, tiles)
 
             cleaned_tiles.extend(ct)
 
@@ -62,7 +62,7 @@ def cleaning_session(id: int, x: int, y: int, actions: list, db):
         return report
 
 
-def clean_north(start_point, step, tiles):
+def _clean_north(start_point, step, tiles):
     cleaned_tiles = []
     try:
         for s in range(1, step + 1):
@@ -87,7 +87,7 @@ def clean_north(start_point, step, tiles):
         return cleaned_tiles, 'failure'
 
 
-def clean_south(start_point, step, tiles):
+def _clean_south(start_point, step, tiles):
     cleaned_tiles = []
     try:
         for s in range(1, step + 1):
@@ -112,7 +112,7 @@ def clean_south(start_point, step, tiles):
         return cleaned_tiles, 'failure'
 
 
-def clean_east(start_point, step, tiles):
+def _clean_east(start_point, step, tiles):
     cleaned_tiles = []
     try:
         for s in range(1, step + 1):
@@ -136,7 +136,7 @@ def clean_east(start_point, step, tiles):
         return cleaned_tiles, 'failure'
 
 
-def clean_west(start_point, step, tiles):
+def _clean_west(start_point, step, tiles):
     cleaned_tiles = []
     try:
         for s in range(1, step + 1):

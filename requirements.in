@@ -4,3 +4,4 @@ uvicorn
 python-multipart
 pandas
 passlib[bcrypt]
+python-dotenv

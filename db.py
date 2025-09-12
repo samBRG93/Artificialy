@@ -10,6 +10,7 @@ DATABASE_URL = "sqlite:///./test.db"  # file SQLite locale
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+Base.metadata.create_all(bind=engine)
 
 
 def post_session(map_id, start_time, final_state, number_of_actions, num_cleaned_tiles, duration, db):
@@ -39,9 +40,6 @@ class Map(Base):
     __tablename__ = "map"
     id = Column(Integer, primary_key=True, index=True, autoincrement=False)
     data = Column(JSON, index=True)
-
-
-Base.metadata.create_all(bind=engine)
 
 
 def get_db():

@@ -1,6 +1,5 @@
 import json
-import secrets
-
+import os
 import pandas as pd
 from fastapi.responses import StreamingResponse
 from datetime import datetime, timedelta
@@ -9,23 +8,24 @@ from fastapi import FastAPI, Depends, UploadFile, Body, File, HTTPException, For
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
 from starlette import status
-
 from data_model import MapInput, parse_map, Action
 from db import get_db, Map, CleaningSession
-from clean import cleaning_session
+from clean import execute_cleaning_session
 from passlib.context import CryptContext
+import dotenv
 
 app = FastAPI()
 security = HTTPBasic()
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+dotenv.load_dotenv()
 
 USERS = {
-    "admin": '$2b$12$TifpVifVczZptFILuZ3VteJO8F9YESg68tRaStEBUTWSej8lgKKBK'
+    "admin": os.getenv("ADMIN_USER_HASH"),
 }
 
 
 def get_current_user(credentials: HTTPBasicCredentials = Depends(security)):
+    os.getenv('users')
     hashed = USERS.get(credentials.username)
     if not hashed or not pwd_context.verify(credentials.password, hashed):
         raise HTTPException(
@@ -74,8 +74,9 @@ async def set_map(
 
 # Rotta: aggiungi utente
 @app.post("/clean/")
-def clean(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db), _user: str = Depends(get_current_user)):
-    return cleaning_session(id, x, y, actions, db)
+def clean(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db),
+          _user: str = Depends(get_current_user)):
+    return execute_cleaning_session(id, x, y, actions, db)
 
 
 @app.get("/history/")
@@ -86,7 +87,6 @@ def history(map_id: str, db: Session = Depends(get_db), _user: str = Depends(get
         if not sessions:
             raise HTTPException(status_code=404, detail="No sessions found for this map")
 
-        # Converti in lista di dizionari
         data = [
             {
                 "id": s.id,
@@ -116,7 +116,8 @@ def history(map_id: str, db: Session = Depends(get_db), _user: str = Depends(get
 
 
 @app.post("/extended-functionality/")
-def extended_functionality(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db), _user: str = Depends(get_current_user)):
+def extended_functionality(id: int, x: int, y: int, actions: list[Action] = Body(...), db: Session = Depends(get_db),
+                           _user: str = Depends(get_current_user)):
     session = db.query(CleaningSession).filter(CleaningSession.map_id == id).order_by(
         CleaningSession.start_time.desc()).first()
 
@@ -128,4 +129,4 @@ def extended_functionality(id: int, x: int, y: int, actions: list[Action] = Body
                 "message": f"Map with id: {id} has been cleaned in date: {end_time}. No need for cleaning"
             }
     else:
-        return cleaning_session(id, x, y, actions, db)
+        return execute_cleaning_session(id, x, y, actions, db)
