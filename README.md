@@ -1,4 +1,4 @@
-# FastAPI Project
+# Cleaning Robot
 
 ## 📄 Assignment
 The details of the assignment are provided in the following document:  
